@@ -79,10 +79,9 @@ jobs:
         uses: Azure/cli@v1
         with:
           # Specify the script here
-          inlineScript: 
-             #!/bin/bash
+          inlineScript: |
              az webapp config access-restriction add --resource-group rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --name ${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --action Deny --ip-address 0.0.0.0/32 --priority 100
-             az webapp config access-restriction add --resource-group rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}} --name ${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --action Allow --vnet-name vnet-${{ env.companybbr }}-${{ env.envtype }}-hub --subnet gateway-subnet --priority 99
+             az webapp config access-restriction add --resource-group rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --name ${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --action Allow --vnet-name vnet-${{ env.companybbr }}-${{ env.envtype }}-hub --subnet gateway-subnet --priority 99
          
       
 
