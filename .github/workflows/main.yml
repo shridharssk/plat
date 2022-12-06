@@ -24,8 +24,6 @@ jobs:
       sku: "F1"
       linuxFxVersion : "node|14-lts"
       
-    environment:
-      name: dev
 
     steps:
     
