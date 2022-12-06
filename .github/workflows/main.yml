@@ -91,7 +91,7 @@ jobs:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: rg-${{ env.companybbr }}-${{ env.envtype }}-${{ env.Applicationname }}-${{env.appID}}
           template: src/biceps/app_plan_svc.bicep
-          parameters: "appPlanName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} sku=${{env.sku}} webAppName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} linuxFxVersion=${{env.linuxFxVersion}} vnetname=vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke"
+          parameters: "appPlanName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} sku=${{env.sku}} webAppName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} linuxFxVersion=${{env.linuxFxVersion}}"
           failOnStdErr: false
       
 
