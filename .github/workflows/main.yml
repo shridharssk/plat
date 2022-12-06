@@ -9,6 +9,9 @@ on:
      - '.github/workflows/main.yml'
     # - 'src/biceps/*'
    
+permissions:
+      id-token: write
+      contents: read
       
 jobs:
   deploy-to-dev:
