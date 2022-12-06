@@ -23,7 +23,7 @@ jobs:
       type: "internal"
       Appplicationtype: "portal"
       envtype: "dev"
-      appID: "test-shree"
+      appID: "test-v1"
       sku: "F1"
       linuxFxVersion : "node|14-lts"
       
@@ -100,14 +100,14 @@ jobs:
 
 
 
-          
+
         # Vnet-Integration
       
       - name: Azure CLI Action to Vnet-Integration
         uses: Azure/cli@v1
         with:
           inlineScript: |
-            az webapp vnet-integration add -g rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} -n wapp-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --vnet vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke --subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}/providers/Microsoft.Network/virtualNetworks/vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke/subnets/appsrv-subnet
+            az webapp vnet-integration add -g rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} -n wapp-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --vnet vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke --subnet appsrv-subnet --vnet-resource-group rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}
 
 
         # Add Access Restriction
