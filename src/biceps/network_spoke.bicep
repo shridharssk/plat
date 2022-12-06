@@ -31,3 +31,4 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-02-01'= {
      ]
    }
  }
+ output appSubnetId string = resourceId('Microsoft.Network/virtualNetworks/subnets', networkName, 'appsrv-subnet')

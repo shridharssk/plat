@@ -59,26 +59,7 @@ jobs:
                az group create --name rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}} --location ${{ env.ResourceGroupLocation }} --tags "type=${{ env.type }}" "ApplicationType=${{ env.Appplicationtype }}"
 
 
-            
-            
-       # this step to configuire App Service...
-          
-          
-          
-       # Deploy Bicep file
-      - name: Deploy App Service Plan
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: rg-${{ env.companybbr }}-${{ env.envtype }}-${{ env.Applicationname }}-${{env.appID}}
-          template: src/biceps/app_plan_svc.bicep
-          parameters: "appPlanName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} sku=${{env.sku}} webAppName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} linuxFxVersion=${{env.linuxFxVersion}} "
-          failOnStdErr: false
-      
-
-
-
-       # Deploy vnet spoke.............
+             # Deploy vnet spoke.............
       - name: Deploy Spoke vNet infrastructure 
         uses: azure/arm-deploy@v1
         with:
@@ -98,18 +79,28 @@ jobs:
           parameters: "name=vnet-${{ env.companybbr }}-${{ env.envtype }}"
           failOnStdErr: false
 
-
-
+            
+       # this step to configuire App Service...
           
-        # Vnet-Integration
-      
-      - name: Azure CLI Action to Vnet-Integration
-        uses: Azure/cli@v1
+          
+          
+       # Deploy Bicep file
+      - name: Deploy App Service Plan
+        uses: azure/arm-deploy@v1
         with:
-          inlineScript: 
-            az webapp vnet-integration add -g rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} -n wapp-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}/providers/Microsoft.Network/virtualNetworks/vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke --subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}/providers/Microsoft.Network/virtualNetworks/vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke/subnets/appsrv-subnet
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: rg-${{ env.companybbr }}-${{ env.envtype }}-${{ env.Applicationname }}-${{env.appID}}
+          template: src/biceps/app_plan_svc.bicep
+          parameters: "appPlanName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} sku=${{env.sku}} webAppName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} linuxFxVersion=${{env.linuxFxVersion}} vnetname=vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke"
+          failOnStdErr: false
+      
 
 
+
+
+
+
+       
         # Add Access Restriction
           
       - name: Azure CLI Action to Restrict Access
