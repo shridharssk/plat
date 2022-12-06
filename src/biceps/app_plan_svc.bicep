@@ -30,6 +30,7 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
   location: location
   properties: {
     serverFarmId: appServicePlan.id
+    virtualNetworkSubnetId: vnet.properties.subnets[0].id
     siteConfig: {
       linuxFxVersion: linuxFxVersion
     }
