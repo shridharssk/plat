@@ -1,0 +1,177 @@
+name: Deploy Infrastructure 
+
+
+on:
+  push:
+    branches: [ main]
+    paths:
+    
+     - '.github/workflows/main.yml'
+    # - 'src/biceps/*'
+     
+
+jobs:
+  deploy-to-dev:
+    runs-on: ubuntu-latest
+    env:
+      companybbr: "cm"
+      Applicationname: "website"
+      ResourceGroupLocation: "eastus"
+      type: "internal"
+      Appplicationtype: "portal"
+      envtype: "dev"
+      appID: "a"
+      sku: "F1"
+      linuxFxVersion : "node|14-lts"
+      
+    environment:
+      name: dev
+
+    steps:
+    
+      # Checkout code
+      - uses: actions/checkout@main
+      
+       # Log into Azure
+      - name: Log in with Azure
+        uses: azure/login@v1
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+      
+      - name: Azure CLI Action
+        uses: Azure/cli@v1
+        with:
+          # Specify the script here.
+          inlineScript: 
+             #!/bin/bash
+             az group create --name rg-${{ env.companybbr }}-${{ env.envtype }}-${{ env.Applicationname }}-${{env.appID}} --location ${{ env.ResourceGroupLocation }} --tags "type=${{ env.type }}" "ApplicationType=${{ env.Appplicationtype }}"
+
+      - name: Azure CLI Action
+        uses: Azure/cli@v1
+        with:
+          # Specify the script here
+          inlineScript: 
+             #!/bin/bash
+               az group create --name rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}} --location ${{ env.ResourceGroupLocation }} --tags "type=${{ env.type }}" "ApplicationType=${{ env.Appplicationtype }}"
+
+
+            
+            
+       # this step to configuire App Service...
+          
+          
+          
+       # Deploy Bicep file
+      - name: Deploy App Service Plan
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: rg-${{ env.companybbr }}-${{ env.envtype }}-${{ env.Applicationname }}-${{env.appID}}
+          template: src/biceps/app_plan_svc.bicep
+          parameters: "appPlanName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} sku=${{env.sku}} webAppName=${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} linuxFxVersion=${{env.linuxFxVersion}} "
+          failOnStdErr: false
+          
+             
+       # Deploy vnet spoke.............
+      - name: Deploy Spoke vNet infrastructure 
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}
+          template: src/biceps/vnet_spoke.bicep
+          parameters: "name=vnet-${{ env.companybbr }}-${{ env.envtype }}"
+          failOnStdErr: false
+          
+      # Deploy vnet hub............
+      - name: Deploy Hub vNet infrastructure 
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}
+          template: src/biceps/vnet_hub.bicep
+          parameters: "name=vnet-${{ env.companybbr }}-${{ env.envtype }}"
+          failOnStdErr: false
+        
+      # Deploy  Application Gatway .................
+      - name: Deploy Application Gatway in Hub vNet infrastructure 
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}
+          template: src/biceps/appGateway.bicep
+          parameters: "vnetname=vnet-${{ env.companybbr }}-${{ env.envtype }}-hub applicationGateWayName=gtway-${{ env.companybbr }}-${{ env.envtype }} backendappservice=wapp-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}}.azurewebsites.net"
+          failOnStdErr: false   
+          
+          
+          
+          
+      # This the setp for Stage 
+      
+      
+      
+  deploy-to-stage:
+    runs-on: ubuntu-latest
+    needs: deploy-to-dev
+    env:
+      companybbr: "cm"
+      Applicationname: "website"
+      ResourceGroupLocation: "eastus"
+      type: "internal"
+      Appplicationtype: "portal"
+      envtype: "stage"
+      
+    environment:
+      name: stage
+
+    steps:
+    
+      # Checkout code
+      - uses: actions/checkout@main
+      
+       # Log into Azure
+      - name: Log in with Azure
+        uses: azure/login@v1
+        with:
+          creds: '${{ secrets.AZURE_CREDENTIALS }}'
+      
+      - name: Azure CLI Action
+        uses: Azure/cli@v1
+        with:
+          # Specify the script here
+          inlineScript: 
+             #!/bin/bash
+             az group create --name rg-${{ env.companybbr }}-${{ env.envtype }}-${{ env.Applicationname }}-${{env.appID}} --location ${{ env.ResourceGroupLocation }} --tags "type=${{ env.type }}" "ApplicationType=${{ env.Appplicationtype }}"
+
+  deploy-to-prod:
+      runs-on: ubuntu-latest
+      needs: [deploy-to-dev,deploy-to-stage]
+      env:
+        companybbr: "cm"
+        Applicationname: "website"
+        ResourceGroupLocation: "eastus"
+        type: "internal"
+        Appplicationtype: "portal"
+        envtype: "prod"
+
+      environment:
+        name: prod
+
+      steps:
+
+        # Checkout code
+        - uses: actions/checkout@main
+
+         # Log into Azure
+        - name: Log in with Azure
+          uses: azure/login@v1
+          with:
+            creds: '${{ secrets.AZURE_CREDENTIALS }}'
+
+        - name: Azure CLI Action
+          uses: Azure/cli@v1
+          with:
+            # Specify the script here
+            inlineScript: 
+               #!/bin/bash
+               az group create --name rg-${{ env.companybbr }}-${{ env.envtype }}-${{ env.Applicationname }}-${{env.appID}} --location ${{ env.ResourceGroupLocation }} --tags "type=${{ env.type }}" "ApplicationType=${{ env.Appplicationtype }}"
+
