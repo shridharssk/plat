@@ -19,7 +19,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 }
 
 
-// params for app service 
+// params for app services.
 
 param linuxFxVersion string // The runtime stack of web app
 param webAppName string 
