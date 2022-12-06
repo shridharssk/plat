@@ -4,8 +4,7 @@ param sku string  // The SKU of App Service Plan
 param location string = resourceGroup().location // Location for all resources
 param appPlanName string
 var appServicePlanName = toLower('AppServicePlan-${appPlanName}')
-param vnetname string 
-param subnetname string = 'appsrv-subnet'
+param appSubnetId string
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: appServicePlanName
@@ -32,9 +31,7 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
   location: location
   properties: {
     serverFarmId: appServicePlan.id
-    subnet: {
-      id: resourceId('Microsoft.Network/virtualNetworks/subnets',vnetname , subnetname)
-    }
+    virtualNetworkSubnetId: appSubnetId
     siteConfig: {
       linuxFxVersion: linuxFxVersion
     }
