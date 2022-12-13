@@ -5,7 +5,6 @@ param location string = resourceGroup().location // Location for all resources
 param appPlanName string
 var appServicePlanName = toLower('AppServicePlan-${appPlanName}')
 
-
 resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: appServicePlanName
   location: location
@@ -19,7 +18,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 }
 
 
-// params for app services
+// params for app service 
 
 param linuxFxVersion string // The runtime stack of web app
 param webAppName string 
@@ -31,7 +30,6 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
   location: location
   properties: {
     serverFarmId: appServicePlan.id
-    virtualNetworkSubnetId: 'vnet-cm-dev-spoke/subnets/appsrv-subnet'
     siteConfig: {
       linuxFxVersion: linuxFxVersion
     }
