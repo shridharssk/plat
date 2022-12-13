@@ -96,10 +96,6 @@ jobs:
       
 
 
-
-
-
-
        
         # Add Access Restriction
           
@@ -113,7 +109,28 @@ jobs:
          
       
 
+          # Add Vnet Integration
+      - name: Azure CLI Action to Restrict Access
+        uses: Azure/cli@v1
+        with:
+          # Specify the script here
+          inlineScript:
+             az webapp vnet-integration add -g rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} -n wapp-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --vnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}/providers/Microsoft.Network/virtualNetworks/vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke --subnet /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-${{ env.companybbr }}-${{ env.envtype }}-security-${{env.appID}}/providers/Microsoft.Network/virtualNetworks/vnet-${{ env.companybbr }}-${{ env.envtype }}-spoke/subnets/appsrv-subnet
           
+             
+      #Application Insights
+      - name: Azure CLI Action to Restrict Access
+        uses: Azure/cli@v1
+        with:
+          # Specify the script here
+          inlineScript:
+            $workspace = $(az monitor log-analytics workspace create -g rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} -n App-Insights-Workspace) | ConvertFrom-Json
+            az extension add -n application-insights
+            $AppInsights = $(az monitor app-insights component create -g rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} -l ${{ env.ResourceGroupLocation }} --app wapp-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --workspace $workspace.Id)  | ConvertFrom-Json
+            az webapp config appsettings set -g rg-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} -n wapp-${{ env.companybbr }}-${{ env.envtype }}-website-${{env.appID}} --settings APPINSIGHTS_INSTRUMENTATIONKEY=$($AppInsights.InstrumentationKey) ApplicationInsightsAgent_EXTENSION_VERSION=~2 XDT_MicrosoftApplicationInsights_Mode=recommended
+
+
+   
              
 
         
